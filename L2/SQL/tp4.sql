@@ -801,3 +801,35 @@ BEGIN
 END $$
 
 DELIMITER ;
+
+
+--14
+CREATE TABLE IF NOT EXISTS histo_article LIKE article;
+ALTER TABLE histo_article ADD COLUMN date_archivage DATETIME;
+
+CREATE TABLE IF NOT EXISTS histo_auteur LIKE auteur;
+ALTER TABLE histo_auteur ADD COLUMN date_archivage DATETIME;
+
+
+DELIMITER $$
+
+CREATE OR REPLACE TRIGGER archive_article_delete
+BEFORE DELETE ON article 
+FOR EACH ROW
+BEGIN
+    INSERT INTO histo_article (articleid, themeid, typeid, titre, contenu, nbsignes, date_archivage)
+    VALUES (OLD.articleid, OLD.themeid, OLD.typeid, OLD.titre, OLD.contenu, OLD.nbsignes, NOW());
+    INSERT INTO histo_auteur (auteurid, personneid, telephone, nom, prenom, email, date_archivage)
+    SELECT 
+        a.auteurid, a.personneid, a.telephone, a.nom, a.prenom, a.email, NOW()
+    FROM auteur a
+    JOIN rediger r ON a.auteurid = r.auteurid
+    WHERE r.articleid = OLD.articleid; 
+    DELETE a 
+    FROM auteur a
+    JOIN rediger r ON a.auteurid = r.auteurid
+    WHERE r.articleid = OLD.articleid;
+
+END $$
+
+DELIMITER ;
