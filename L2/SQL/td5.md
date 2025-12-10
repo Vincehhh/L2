@@ -1,6 +1,6 @@
 
 ---
-Exercice1
+Question 1-1
 
 ```sql
 DELIMITER $$
@@ -48,9 +48,57 @@ DELIMITER ;
 
 ````
 
+---
+Question 1-2
+
+```
+DELIMITER $$
+
+CREATE TRIGGER modifLigne
+BEFORE UPDATE ON detailCommande -- "BEFORE" est nécessaire pour modifier NEW.prixUnitaire
+FOR EACH ROW
+BEGIN
+    DECLARE pu DECIMAL(10,2);
+
+    -- 1. Vérification : On empêche le changement de numéro de commande (intégrité)
+    IF NEW.noCommande <> OLD.noCommande THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Il est interdit de modifier la valeur de la clé étrangère noCommande';
+    END IF;
+
+    -- 2. Récupération et correction du Prix Unitaire
+    -- L'énoncé dit : "Le prixUnitaireVente doit correspondre au prixUnitaire de l'article"
+    SET pu = NULL;
+    SELECT prixUnitaire INTO pu
+    FROM article
+    WHERE refArticle = NEW.refArticle;
+
+    IF pu IS NOT NULL THEN
+        SET NEW.prixUnitaire = pu; -- On force le bon prix dans la nouvelle ligne
+    END IF;
+
+    -- 3. Mise à jour du Stock (Table Article)
+    -- Logique : On remet l'ancienne quantité en rayon (+ OLD) et on retire la nouvelle (- NEW)
+    UPDATE article
+    SET qteStock = qteStock + OLD.qteCommande - NEW.qteCommande
+    WHERE refArticle = NEW.refArticle;
+
+    -- 4. Mise à jour du Montant Total (Table Commande)
+    -- Logique : On soustrait l'ancien montant de la ligne et on ajoute le nouveau calculé
+    UPDATE commande
+    SET montantTotal = montantTotal 
+                       - (OLD.qteCommande * OLD.prixUnitaire) 
+                       + (NEW.qteCommande * NEW.prixUnitaire)
+    WHERE noCommande = NEW.noCommande;
+
+END $$
+
+DELIMITER ;
+```
+
 
 ---
-Exercice 2-1a
+Question 2-1a
 
 ```sql
 
@@ -99,7 +147,7 @@ DELIMITER ;
 
 
 ---
-Exercice 2-1b
+Question 2-1b
 
 ```sql 
 SELECT 
