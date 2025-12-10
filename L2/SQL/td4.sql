@@ -38,7 +38,7 @@ ADD CONSTRAINT ck_montant_positif CHECK (MontantCahier > 0);
 ALTER TABLE APPEL
 ALTER COLUMN DateAppel SET DEFAULT (CURDATE());
 
--6
+--6
 ALTER TABLE CAHIER
 DROP CHECK ck_montant_positif;
 
@@ -180,3 +180,4 @@ JOIN APPEL A ON C.NumClient = A.NumClient
 JOIN CAHIER CH ON A.NumAppel = CH.NumAppel
 GROUP BY C.NomClient
 HAVING COUNT(DISTINCT A.NumAppel) > 5 AND SUM(CH.MontantCahier) > 100000;
+
