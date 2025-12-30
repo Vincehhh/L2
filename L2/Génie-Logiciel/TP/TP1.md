@@ -56,7 +56,10 @@ nombre de 1 " + objet.getStatut());
 ```
 
 ## Exercice 2 
+### 1.UML
 <img width="934" height="549" alt="image" src="https://github.com/user-attachments/assets/860ffdb7-5c20-4952-80be-7e403bae630d" />
+
+### 2.Code
 
 ```java
 public class Exercice2 {
