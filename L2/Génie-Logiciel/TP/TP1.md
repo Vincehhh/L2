@@ -262,6 +262,7 @@ public class Exercice4 {
             if (c == _motCible.charAt(state)) {
                 state++; 
                 if (state == _motCible.length()) {
+                    int positionDebut = i - state + 1;
                     this._occurrences.add(positionDebut);
                     state = 0; 
                 }
