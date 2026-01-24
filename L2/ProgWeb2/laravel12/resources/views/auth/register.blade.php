@@ -2,6 +2,13 @@
     <form method="POST" action="{{ route('register') }}">
         @csrf
 
+        <!-- First Name -->
+        <div>
+            <x-input-label for="firstname" :value="__('First Name')" />
+            <x-text-input id="firstname" class="block mt-1 w-full" type="text" name="firstname" :value="old('firstname')" required autofocus autocomplete="firstname" />
+            <x-input-error :messages="$errors->get('firstname')" class="mt-2" />
+        </div>
+
         <!-- Name -->
         <div>
             <x-input-label for="name" :value="__('Name')" />
