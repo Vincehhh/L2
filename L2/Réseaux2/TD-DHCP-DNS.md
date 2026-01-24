@@ -64,3 +64,19 @@ Meilleure proposition : Il faut utiliser des plages d'adresses disjointes.
 Exemple : Serveur A distribue de 192.168.1.1 à 192.168.1.50.
 Serveur B distribue de 192.168.1.51 à 192.168.1.100. Ainsi, si un serveur tombe en panne, 
 l'autre peut toujours servir des adresses, et il n'y a aucun risque qu'ils donnent la même IP à deux personnes différentes.
+
+
+
+## Exercice 2 
+
+### Q1. 
+**Adresse Source (0.0.0.0) :** Le client utilise cette adresse car il n'a pas encore de configuration IP active sur le réseau au moment du démarrage.
+* **Adresse Destination (255.255.255.255) :** C'est une adresse de diffusion (broadcast). Le client utilise cette adresse pour contacter n'importe quel serveur DHCP présent sur le réseau local, car il ne connaît pas l'adresse spécifique du serveur.
+
+**Q2. Adresse MAC destination du message n°1**
+Bien qu'elle ne soit pas visible dans le tableau, l'adresse MAC de destination est obligatoirement `ff:ff:ff:ff:ff:ff`.
+Comme le paquet IP est envoyé en broadcast (à tout le monde), la trame Ethernet doit aussi être adressée à toutes les cartes réseaux pour être traitée.
+
+**Q3. Signification des adresses du message n°2 et réception**
+* **Signification :** L'adresse source `192.168.0.1` correspond à l'adresse du serveur DHCP qui répond. L'adresse destination `192.168.0.10` est l'adresse IP que le serveur propose d'attribuer au client.
+* **Réception du message :** Le message parvient bien au client même sans IP configurée grâce à la couche liaison (Ethernet). Le serveur envoie la réponse directement à l'adresse MAC du client (qu'il a reçue dans le premier message). La carte réseau du client intercepte donc la trame car elle reconnaît son adresse physique.
