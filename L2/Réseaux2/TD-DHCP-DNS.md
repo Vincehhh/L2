@@ -73,10 +73,39 @@ l'autre peut toujours servir des adresses, et il n'y a aucun risque qu'ils donne
 **Adresse Source (0.0.0.0) :** Le client utilise cette adresse car il n'a pas encore de configuration IP active sur le réseau au moment du démarrage.
 * **Adresse Destination (255.255.255.255) :** C'est une adresse de diffusion (broadcast). Le client utilise cette adresse pour contacter n'importe quel serveur DHCP présent sur le réseau local, car il ne connaît pas l'adresse spécifique du serveur.
 
-**Q2. Adresse MAC destination du message n°1**
+### Q2. Adresse MAC destination du message n°1**
 Bien qu'elle ne soit pas visible dans le tableau, l'adresse MAC de destination est obligatoirement `ff:ff:ff:ff:ff:ff`.
 Comme le paquet IP est envoyé en broadcast (à tout le monde), la trame Ethernet doit aussi être adressée à toutes les cartes réseaux pour être traitée.
 
-**Q3. Signification des adresses du message n°2 et réception**
+### Q3. Signification des adresses du message n°2 et réception**
 * **Signification :** L'adresse source `192.168.0.1` correspond à l'adresse du serveur DHCP qui répond. L'adresse destination `192.168.0.10` est l'adresse IP que le serveur propose d'attribuer au client.
-* **Réception du message :** Le message parvient bien au client même sans IP configurée grâce à la couche liaison (Ethernet). Le serveur envoie la réponse directement à l'adresse MAC du client (qu'il a reçue dans le premier message). La carte réseau du client intercepte donc la trame car elle reconnaît son adresse physique.
+* **Réception du message :** Le message parvient bien au client même sans IP configurée grâce à la couche liaison. Le serveur envoie la réponse directement à l'adresse MAC du client. La carte réseau du client intercepte donc la trame car elle reconnaît son adresse physique.
+
+## Exercice 3 
+
+### Q1. Décrire les paramètres qu’un serveur DHCP peut fournir à un client ?
+
+En plus de fournir une adresse ip au client, le serveur dhcp fournit : 
+
+- Un masque de sous réseau
+- La passerelle par défaut
+- Les serveurs DNS
+- Le nom de domaine
+- Le temps du bail
+
+### Q2. Quelles sont les informations que doit maintenir un serveur DHCP sur disque pour pouvoir gérer la reprise suite à un arrêt brusque (par exemple suite à une coupure de courant) ?
+
+Le serveur doit absolument sauvegarder l'état des bails actuels de chaque ip (sur le fichier dhcpd.leases), sinon si le courant saute, que le serveur redémarre et qu'il ne sais pas quelle adresse correspond à quelle ip , il risque d'attribuer une adresse déjà prise à une autre machine , ce qui engendre un conflit d'ip.
+
+### Q3. Si un réseau contient plusieurs serveurs DHCP. Expliquer comment un serveur DHCP se rend compte que l’offre qu’il a proposée pour un client n’était pas retenue.
+Lorsqu'un client choisit une offre, il envoie son message de validation (DHCP REQUEST) en diffusion (broadcast) à tout le réseau avec l'identifiant du serveur choisi à l'intérieur. Les autres serveurs reçoivent aussi ce message, et comme ils voient que ce n'est pas leur identifiant qui est sélectionné, ils comprennent que leur offre a été rejetée et peuvent libérer l'adresse IP pour quelqu'un d'autre.
+
+### Q4. Cette configuration permet-elle de préciser aux clients les adresses IP des serveurs DNS ? Expliquer ?
+
+Non, car il manque cette ligne : `option domain-name-servers`, le client ne pourra donc pas résoudre les noms de domaines sans chemin vers un serveur DNS.
+
+
+### Q5. Donner la signification des quatre dernières lignes du fichier dhcp.conf ci-dessus.Un agresseur (n’ayant pas accès au poste 1) peut-il obtenir l’adresse IP 192.168.16.99. Si oui, comment ?
+
+Les quatre dernières lignes servent à configurer une réservation d'adresse (bail statique) : elles forcent le serveur à attribuer systématiquement l'IP 192.168.16.99 à la machine possédant l'adresse MAC 08:00:2b:4c:29:32 . Oui, un agresseur peut obtenir cette IP car le serveur se base uniquement sur l'adresse MAC pour l'identifier . Si l'agresseur change l'adresse MAC de sa propre machine pour copier celle du poste 1 (usurpation ou spoofing), le serveur ne le verra pas et lui attribuera l'IP réservée.
+
