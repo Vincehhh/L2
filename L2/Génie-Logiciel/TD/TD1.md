@@ -40,3 +40,33 @@ M démarre à 29 au lieu de 25 soit un retard de 4 jours.
 La durée totale deviens 32+ 4 = 36 jours.
 
 
+## Exercice 3 
+
+### 1.
+
+<img width="1909" height="758" alt="image" src="https://github.com/user-attachments/assets/1b5da800-6726-4ed6-a859-bc9ff9469804" />
+
+
+### 2. 
+
+Chemin critique en rouge : A -> D -> G -> I -> J -> K 
+Durée minimale : 35 jours. 
+
+### 3. 
+
+<img width="1912" height="806" alt="image" src="https://github.com/user-attachments/assets/0c5bb926-9af3-4a0a-8af6-be80b100b870" />
+
+### 4. 
+Impact sur H : durée prolongée de 15 jours. Donc durée maintenant de 10 + 15 = 25 jours. Mais cela n'a aucun impacte sur l'ensemble du projet car i dépend aussi de G , qui lui se termine beaucoup plus tard, donc si H termine maintenant le 28 février ou le 1 en prenant en compte le week -end , il sera tout de meme moins long que G qui termine le 6 février. 
+
+### 5. 
+
+Impact : Réduit le temps total du projet de 3 jours, qu'importe si on prend en compte ou pas la contrainte de la question 4 car il reste dans le chemin critique.
+
+## Exercice 4 
+
+
+
+
+
+
