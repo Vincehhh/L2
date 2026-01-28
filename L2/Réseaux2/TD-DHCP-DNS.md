@@ -109,3 +109,48 @@ Non, car il manque cette ligne : `option domain-name-servers`, le client ne pour
 
 Les quatre dernières lignes servent à configurer une réservation d'adresse (bail statique) : elles forcent le serveur à attribuer systématiquement l'IP 192.168.16.99 à la machine possédant l'adresse MAC 08:00:2b:4c:29:32 . Oui, un agresseur peut obtenir cette IP car le serveur se base uniquement sur l'adresse MAC pour l'identifier . Si l'agresseur change l'adresse MAC de sa propre machine pour copier celle du poste 1 (usurpation ou spoofing), le serveur ne le verra pas et lui attribuera l'IP réservée.
 
+## Exercice 4 
+
+### Q1. Quels sont les avantages apportés par l’utilisation d’un cache pour le FAI, pour les serveurs DNS  et pour l’utilisateur ?
+
+Le cache permet d'éviter de refaire le travail inutilement. Pour le FAI, cela économise de la bande passante et de la puissance serveur, et pour l'utilisateur, la navigation est beaucoup plus rapide car la réponse est immédiate .
+
+### Q2. N’importe qui peut créer un serveur DNS qui prétend connaître les adresses IP des machines d’un domaine donné (et qui pourrait donc donner de fausses adresses IP). Pourquoi n’est-ce pas un problème ?
+
+Parce que le DNS fonctionne par chaîne de confiance. Même si un serveur pirate existe, les serveurs officiels ne le connaissent pas et ne redirigeront jamais les requêtes vers lui, donc il restera ignoré .
+
+### Q3. Pourquoi est-il important de limiter la durée de vie des informations dans le cache ? Expliquez pourquoi certaines adresses IP peuvent être gardées en mémoire plus longtemps que d’autres. Pourquoi est-il important de bien estimer l’ordre de grandeur des TTL ? (quels sont les inconvénients d’un TTL trop petit ou trop grand).
+
+Il faut limiter la durée de vie des infos dans le cache car les adresses IP des sites peuvent changer.
+ Si trop grand : Si le site change d'IP, le cache garde la vieille adresse périmée et l'utilisateur ne peut plus se connecter.
+ Si trop petit : Le serveur doit tout le temps redemander la même chose, ce qui surcharge le réseau et ralentit tout le monde .
+
+### Q3 bis. Expliquez sur l’exemple du début de l’exercice ce qui se passerait s’il n’y avait pas de glue record, c’est-à-dire si les serveurs DNS se contentaient de donner le nom du serveur suivant à interroger, sans donner son adresse. Indication : le serveur b.gtld.servers.net appartient lui-même au domaine dont il est responsable.
+
+Sans les glue record, le système serait bloqué dans une boucle logique insoluble lors de la résolution de nom. Si un serveur parent renvoyait uniquement le nom du serveur suivant à interroger sans fournir son adresse IP , le résolveur ne pourrait pas contacter ce serveur pour lui poser sa question, puisqu'il aurait d'abord besoin de son IP pour le joindre.
+
+## Exerice 5 
+
+### Q1. Pourquoi quelqu’un voudrait-il empoisonner le cache d’un serveur DNS ?
+
+L'intérêt pour un attaquant d'empoisonner le cache est de parvenir à rediriger, à son insu, les requêtes des utilisateurs vers une machine qu'il contrôle. En effet, si un utilisateur parvient à faire croire à un certain FAI que le serveur responsable de toutes les adresses sur un domaine donné est une machine lui appartenant, et que cette adresse est enregistrée dans le cache du FAI, toute les requêtes effectuées par des clients du FAI sur le domaine en question seront renvoyées vers la machine de l’attaquant
+
+### Q2. Quelles sont les personnes affectées par l’attaque ?
+
+Les victimes de cette attaque sont l'ensemble des utilisateurs qui effectuent leurs requêtes DNS via le serveur dont le cache a été corrompu.
+
+### Q3. En quoi l’empoisonnement de cache DNS est-il similaire à du phishing ? En quoi l’attaque DNS est elle plus puissante que les techniques de phishing ?
+
+Bien que les deux attaques visent à tromper l'utilisateur pour lui voler des informations via un faux site, l'empoisonnement DNS est techniquement beaucoup plus redoutable. En effet , contrairement au phishing classique où l'utilisateur peut repérer une URL suspecte, ici l'attaque est invisible car la victime saisit la véritable adresse du site mais est redirigée vers le serveur pirate par l'infrastructure réseau elle-même. Il est donc quasiment impossible pour un utilisateur standard de détecter le problème , car il fait confiance à la résolution de nom fournie par son FAI.
+
+### Q4. Expliquez l’intérêt de la dernière contrainte. Indication: N’importe qui peut ouvrir un nom de domaine quelconque puis contrôler totalement le serveur DNS correspondant à ce nom de domaine. Que se passerait-il alors si cette personne demandait au DNS de son FAI l’adresse d’une machine se trouvant dans son domaine ?
+
+La contrainte sur les glue records est essentielle pour empêcher un serveur DNS malveillant de corrompre des domaines qui ne lui appartiennent pas. Sans cette vérification, n'importe qui possédant un nom de domaine anodin pourrait profiter d'une requête légitime pour injecter de fausses adresses concernant des domaines critiques dans les réponses additionnelles
+
+### Q5. Comment un utilisateur malveillant peut-il obtenir le numéro de requête courant du serveur DNS de son FAI ? (utiliser l’indication de la question précédente)
+
+Pour réussir son injection, l'attaquant doit prédire le numéro de transaction  utilisé par le serveur cible. Pour cela, il lui suffit de forcer le serveur DNS du FAI à lui envoyer une requête, par exemple en demandant la résolution d'un domaine que l'attaquant administre lui-même. En analysant la requête reçue sur son serveur, il récupère l'ID courant et peut facilement déduire le suivant qui sera utilisé pour la requête victime.
+
+### Q6. Que se passe-t-il si l’utilisateur malveillant demande à son FAI l’adresse de « www.banque.net » puis immédiatement après envoie une fausse réponse DNS contenant la bonne question, le bon numéro de requête (qu’il connaît par la méthode de la question précédente) et qui prétend que l’adresse IP de la machine « www.banque.net » est l’adresse IP d’une machine qu’il contrôle ? (on suppose que l’adresse de « www.banque.net » n’est pas dans le cache du serveur DNS du FAI).
+
+L'attaquant déclenche une requête pour la banque, puis envoie immédiatement une fausse réponse avec le bon ID .Si cette fausse réponse parvient au serveur du FAI avant celle du serveur DNS légitime, elle est acceptée et stockée dans le cache. La réponse officielle qui arrivera plus tard sera alors considérée comme un doublon inutile et ignorée, laissant le cache empoisonné.
