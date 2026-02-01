@@ -13,10 +13,16 @@ return new class extends Migration
     {
         Schema::create('books', function (Blueprint $table) {
             $table->id();
+            $table->string('title');
+            $table->text('description')->nullable();
+            $table->string('image')->nullable();
+            $table->integer('page');
+            $table->integer('price');
+            $table->boolean('is_published')->default(true);
+            $table->foreignId('author_id')->constrained();
             $table->timestamps();
         });
     }
-
     /**
      * Reverse the migrations.
      */
