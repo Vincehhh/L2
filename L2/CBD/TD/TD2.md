@@ -151,6 +151,61 @@ $$\{A, B}^+ = \{A, B, C, E, F\}$$
     - On a A -> C et C -> D donc A -> D inutile
     - On a A -> D et D -> C donc A -> C inutile
     - On a C -> et D -> E donc C -> E inutile
+    - On a D -> C et -> C-> E donc D -> E inutile
+
+- Solution 1 : Chemin par C 
+    - On garde A-> C et on supprime A-> D , retrouvable via A-> C -> D
+    - On garde C -> E et on supprime D -> E ,retrouvable via D-> C -> E
+    -  Couverture minimale 1 : { A -> C , C-> B , C -> D , C -> E, D -> C}
+
+- Solution 2 : Chemin par D
+  - On garde A -> D et on supprime A -> C , retrouvable via A -> D -> C
+  - On garde D -> E et on supprime C -> E , retrouvable via C-> D -> E
+  -  Couverture minimale 2 : { A -> D, C -> B, C -> C -> D , D-> C, D -> E}
+
+## Exercice 9.
+
+### Soit la relation R(A,B,C,D) avec les Dfs F = {A −→ B,AB −→ CD} 1. Produisez une couverture minimale pour F ;
+
+- Etape 1 : atomisation :
+  - A -> B
+  - AB -> CD devient deux règles : AB -> C et AB -> D 
+ 
+- Etape  2 : Supresssion attributs étranger
+  - AB -> C et A -> B donc A -> C (car A détermine B)
+  - AB -> D et A -> B donc A -> D
+  - Couvertur minimale { A -> B , A-> C , A -> D }
+ 
+### 2. Quelles sont les clés candidates de la relation R?.
+
+L'attribut A n'apparait jamais à droite donc c'est forcément lui qui détermine tout : 
+
+$A^+ = \{A, B, C, D\}$
+
+## Exercice 10 
+### Soit la relation R(A,B,C,D) avec les Dfs F = {A −→ B,B −→ C,C −→ B,A −→ C} 1. Produisez une couverture minimale pour F ;
+
+- Etape 1 : Décomposition de F :
+  - A -> B
+  - B -> C
+  - C -> B
+  - A -> C
+ 
+- Etape 2 : Chercher redondance :
+  - A -> B et C -> B donc A -> C inutile
+  - A -> C et C -> B donc A -> B inutile 
+  - Couverture minimale 1 : { B -> C , C -> B , A -> C }
+  - Couverture minimale 2 : { A -> B , B -> C , C -> B }
+ 
+
+  
+
+
+  
+ 
+  
+ 
+      
         
 
   
