@@ -73,13 +73,8 @@ WHERE cup = 2010 AND matchDate = '22/6'
 ### 8. (c) Quelles équipes ont gagné les matches du 22/6/2010 ?
 
 ```sql
-SELECT CASE 
-    WHEN CAST(SUBSTRING_INDEX(goals, ':', 1) AS UNSIGNED) > CAST(SUBSTRING_INDEX(goals, ':', -1) AS UNSIGNED) THEN team1
-    WHEN CAST(SUBSTRING_INDEX(goals, ':', -1) AS UNSIGNED) > CAST(SUBSTRING_INDEX(goals, ':', 1) AS UNSIGNED) THEN team2
-END as Winner
-FROM A_MATCHES
-WHERE cup = 2010 AND matchDate = '22/6'
-HAVING Winner IS NOT NULL;
+SELECT team1 as team FROM a_matches WHERE LEFT(goals, 1) > RIGHT (goals, 1)
+UNION SELECT team2 as team FROM a_matches WHERE LEFT (goals, 1) < RIGHT (goals,1)
 ```
 
 ### 9. (c) Quelles équipes ont marqué plus de 3 buts dans un match ?
@@ -155,4 +150,98 @@ FROM (
 ) as Palmares
 GROUP BY team
 HAVING COUNT(*) > 1;
+```
+
+
+### 17. (d) De quels groupes sont les équipes qui ont joué le 22/6/2010 ?
+
+```sql
+SELECT g.groupId
+FROM A_MATCHES M JOIN A_GROUPS G ON M.cup = G.cup
+AND (
+  M.team1 IN (G.firstPlace, G.secondPlace, G.thirdPlace, G.fourthPlace)
+  OR M.team2 IN (G.firstPlace,  G.secondPlace, G.thirdPlace, G.fourthPlace )
+)
+WHERE M.cup = 2010 AND M.matchDate = '22/6'
+```
+
+### 18.(d) Quels joueurs ont été élus meilleurs buteurs ?
+
+```sql
+SELECT 
+SUBSTRING(goalScore, LOCATE('-', goalScore) + 2) as Joueur
+FROM A_TOP
+WHERE goalScore IS NOT NULL 
+  AND goalScore LIKE '%-%';
+```
+
+### 19. (d) Quels joueurs ont été élus meilleurs buteurs dans plusieurs coupes du monde ?
+
+```sql
+SELECT 
+    SUBSTRING(goalScore, LOCATE('-', goalScore) + 2) AS Joueur,
+    COUNT(*) AS Nb_Trophees
+FROM A_TOP
+WHERE goalScore LIKE '%-%' 
+GROUP BY Joueur
+HAVING COUNT(*) > 1;
+
+```
+
+### 20. (d) Quels sont les équipes ayant gagné une coupe du monde et dont un des joueurs a été meilleur buteur ?
+
+
+
+## Partie III – Modifications de schéma et migration de données
+
+
+### 1. Créer une table A-CUPS qui stockera, pour chaque coupe, les pays organisateurs. Nommer les attributs cup (number/4/not null) et hosts(varchar2/25/not null). La clé primaire est cup. Inclure la contrainte cup => 1930
+
+```sql
+CREATE TABLE A_CUPS (
+    cup     INT NOT NULL,         
+    hosts   VARCHAR(25) NOT NULL,  
+    CONSTRAINT pk_A_Cups PRIMARY KEY (cup),
+    CONSTRAINT ch_cup_date CHECK (cup >= 1930)
+);
+```
+
+### 2. Insérer des données des coupes et leurs organisateurs dans A_CUPS à partir de données stockées dans A-TOP. Attention : n’insérez pas les tuples un à un, chargez-les de la table A-TOP.
+
+```sql
+INSERT INTO A_CUPS (cup, hosts)
+SELECT DISTINCT cup, host 
+FROM A_TOP;
+```
+
+### 3. Supprimer les tuples correspondant aux coupes à venir de la table A-TOP
+
+```sql
+DELETE FROM A_TOP 
+WHERE winner IS NULL;
+```
+
+### 4. Modifier la table A_TOP afin de supprimer l’attribut host (l’information se retrouve maintenant dans la table A_CUPS).
+
+```sql
+ALTER TABLE A_TOP 
+DROP COLUMN host;
+```
+
+
+
+### 5. La table A_CUPS liste désormais toutes les coupes passées et à venir. Définir des clés étrangères dans toutes les autres tables, pour référer à l’attribut cup de la table A_CUPS.
+
+```sql
+ALTER TABLE A_TEAMS
+ADD CONSTRAINT fk_A_Teams_cup FOREIGN KEY (cup) REFERENCES A_CUPS(cup);
+
+ALTER TABLE A_GROUPS
+ADD CONSTRAINT fk_A_Groups_cup FOREIGN KEY (cup) REFERENCES A_CUPS(cup);
+
+ALTER TABLE A_MATCHES
+ADD CONSTRAINT fk_A_Matches_cup FOREIGN KEY (cup) REFERENCES A_CUPS(cup);
+
+ALTER TABLE A_TOP
+ADD CONSTRAINT fk_A_Top_cup FOREIGN KEY (cup) REFERENCES A_CUPS(cup);
 ```
