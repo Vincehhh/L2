@@ -11,6 +11,6 @@ class AuthorController extends Controller
     {
         $author = Author::with('books')->find($id);
 
-        return view('authors.show', compact('author'));
+        return view('authors.show', ['author' => $author]);
     }
 }

@@ -12,8 +12,6 @@ class Author extends Model
     /** @use HasFactory<\Database\Factories\AuthorFactory> */
     use HasFactory;
     
-     use HasFactory;
-
     protected $fillable = ['name', 'firstname', 'biography'];
 
     public function books(): HasMany
